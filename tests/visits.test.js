@@ -84,12 +84,27 @@ describe('POST /visits', () => {
 });
 
 describe('GET /visits', () => {
-  test('returns 200 and an array of visits (from DB scan)', async () => {
+  test('returns visits from the database scan', async () => {
+    scanVisits.mockResolvedValueOnce([
+      {
+        id: 'fake-id',
+        seekerName: 'Hawra',
+        requestType: 'prophecy',
+        aspect: 'luck',
+        resultText: '🍀 A small risk will pay off soon.',
+        createdAt: '2026-01-04T00:00:00.000Z',
+      },
+    ]);
+
     const res = await request(app).get('/visits');
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-
+    expect(res.body.length).toBe(1);
+    expect(res.body[0]).toMatchObject({
+      id: 'fake-id',
+      seekerName: 'Hawra',
+    });
     // DB interaction contract
     expect(scanVisits).toHaveBeenCalledTimes(1);
   });
