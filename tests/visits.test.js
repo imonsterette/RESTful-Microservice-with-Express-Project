@@ -2,9 +2,10 @@ jest.mock('../services/database', () => ({
   putVisit: jest.fn().mockResolvedValue(true),
   scanVisits: jest.fn().mockResolvedValue([]),
   getVisitById: jest.fn(),
+  updateVisit: jest.fn(),
 }));
 
-const { putVisit, scanVisits, getVisitById } = require('../services/database');
+const { putVisit, scanVisits, getVisitById, updateVisit } = require('../services/database');
 
 const request = require('supertest');
 const app = require('../app');
@@ -148,5 +149,50 @@ describe('GET /visits/:id', () => {
 
     expect(getVisitById).toHaveBeenCalledTimes(1);
     expect(getVisitById).toHaveBeenCalledWith('missing-id');
+  });
+});
+
+describe('PUT /visits/:id', () => {
+  test('updates note and returns 200 with updated item', async () => {
+    const existing = {
+      id: 'id-123',
+      seekerName: 'Hawra',
+      requestType: 'prophecy',
+      aspect: 'luck',
+      resultText: '🍀 A small risk will pay off soon.',
+      createdAt: '2026-01-04T00:00:00.000Z',
+    };
+
+    getVisitById.mockResolvedValueOnce(existing);
+
+    updateVisit.mockResolvedValueOnce({
+      ...existing,
+      note: 'I trust the omen.',
+      updatedAt: '2026-01-04T01:00:00.000Z',
+    });
+
+    const res = await request(app).put('/visits/id-123').send({ note: 'I trust the omen.' });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      id: 'id-123',
+      note: 'I trust the omen.',
+    });
+    expect(res.body).toHaveProperty('updatedAt');
+
+    expect(getVisitById).toHaveBeenCalledWith('id-123');
+    expect(updateVisit).toHaveBeenCalledTimes(1);
+  });
+
+  test('returns 404 if visit does not exist', async () => {
+    getVisitById.mockResolvedValueOnce(null);
+
+    const res = await request(app).put('/visits/missing-id').send({ note: 'hello' });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({ error: 'Not found' });
+
+    expect(getVisitById).toHaveBeenCalledWith('missing-id');
+    expect(updateVisit).not.toHaveBeenCalled();
   });
 });

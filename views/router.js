@@ -5,13 +5,14 @@ const router = express.Router();
 
 const { validateVisit } = require('../models/visit');
 const { pickMessage } = require('../services/oracleEngine');
-const { putVisit } = require('../services/database');
-const { scanVisits, getVisitById } = require('../services/database');
+const { putVisit, scanVisits, getVisitById, updateVisit } = require('../services/database');
 
+// Health check
 router.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// Create a visit
 router.post('/visits', async (req, res, next) => {
   try {
     const { error, value } = validateVisit(req.body);
@@ -43,16 +44,17 @@ router.post('/visits', async (req, res, next) => {
   }
 });
 
+// List visits
 router.get('/visits', async (req, res, next) => {
   try {
     const visits = await scanVisits();
-    res.status(200).json(visits);
+    return res.status(200).json(visits);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 });
 
-// temp stub
+// Get one visit by id
 router.get('/visits/:id', async (req, res, next) => {
   try {
     const visit = await getVisitById(req.params.id);
@@ -62,6 +64,23 @@ router.get('/visits/:id', async (req, res, next) => {
     }
 
     return res.status(200).json(visit);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// Update visit (note)
+router.put('/visits/:id', async (req, res, next) => {
+  try {
+    const existing = await getVisitById(req.params.id);
+    if (!existing) return res.status(404).json({ error: 'Not found' });
+
+    const note = req.body?.note;
+
+    // add Joi validation for note next step
+    const updated = await updateVisit(req.params.id, { note });
+
+    return res.status(200).json(updated);
   } catch (err) {
     return next(err);
   }

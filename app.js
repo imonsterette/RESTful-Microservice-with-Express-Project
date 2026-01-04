@@ -2,17 +2,13 @@ const express = require('express');
 
 const app = express();
 
+// Parse JSON bodies (and surface invalid JSON as an error we handle below)
 app.use(express.json());
 
 const router = require('./views/router');
-
 app.use(router);
 
-// Minimal temorary route
-// app.get('/health', (req, res) => {
-//   res.status(200).json({ status: 'ok' });
-// });
-
+// Invalid JSON handler (must have 4 args to be treated as error middleware)
 app.use((err, req, res, next) => {
   const isInvalidJson = err instanceof SyntaxError && err.status === 400 && 'body' in err;
 
@@ -20,10 +16,10 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ error: 'Invalid JSON' });
   }
 
-  // Anything else: pass along
   return next(err);
 });
-// json 404 fallback
+
+// JSON 404 fallback
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
