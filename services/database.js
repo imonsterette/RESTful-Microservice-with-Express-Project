@@ -1,5 +1,10 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
+const {
+  DynamoDBDocumentClient,
+  PutCommand,
+  ScanCommand,
+  GetCommand,
+} = require('@aws-sdk/lib-dynamodb');
 
 const REGION = process.env.AWS_REGION;
 const TABLE_NAME = process.env.DYNAMODB_TABLE;
@@ -24,8 +29,6 @@ async function putVisit(item) {
   return item;
 }
 
-const { ScanCommand } = require('@aws-sdk/lib-dynamodb');
-
 async function scanVisits() {
   if (!TABLE_NAME) {
     throw new Error('DYNAMODB_TABLE is not set');
@@ -39,4 +42,18 @@ async function scanVisits() {
   return result.Items || [];
 }
 
-module.exports = { putVisit, scanVisits };
+async function getVisitById(id) {
+  if (!TABLE_NAME) {
+    throw new Error('DYNAMODB_TABLE is not set');
+  }
+
+  const command = new GetCommand({
+    TableName: TABLE_NAME,
+    Key: { id },
+  });
+
+  const result = await docClient.send(command);
+  return result.Item || null;
+}
+
+module.exports = { putVisit, scanVisits, getVisitById };
