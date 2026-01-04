@@ -18,3 +18,14 @@ describe('404 handling', () => {
     expect(res.body).toEqual({ error: 'Not found' });
   });
 });
+describe('Invalid JSON handling', () => {
+  test("POST with invalid JSON returns 400 and {error:'Invalid JSON'}", async () => {
+    const res = await request(app)
+      .post('/visits')
+      .set('Content-Type', 'application/json')
+      .send('{ "seekerName": "Hawra", }'); // invalid JSON (trailing comma)
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid JSON' });
+  });
+});
