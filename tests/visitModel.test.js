@@ -41,3 +41,16 @@ describe('Visit validation', () => {
     expect(error.details[0].path).toEqual(['targetName']);
   });
 });
+
+test('invalid aspect fails validation', () => {
+  const payload = {
+    seekerName: 'Hawra',
+    requestType: 'prophecy',
+    aspect: 'bananas',
+  };
+
+  const { error } = validateVisit(payload);
+
+  expect(error).toBeTruthy();
+  expect(error.details[0].path).toEqual(['aspect']);
+});
