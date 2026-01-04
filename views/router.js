@@ -6,6 +6,7 @@ const router = express.Router();
 const { validateVisit } = require('../models/visit');
 const { pickMessage } = require('../services/oracleEngine');
 const { putVisit } = require('../services/database');
+const { scanVisits } = require('../services/database');
 
 router.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
@@ -42,9 +43,13 @@ router.post('/visits', async (req, res, next) => {
   }
 });
 
-//temporary stub
-router.get('/visits', (req, res) => {
-  res.status(200).json([]);
+router.get('/visits', async (req, res, next) => {
+  try {
+    const visits = await scanVisits();
+    res.status(200).json(visits);
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = router;

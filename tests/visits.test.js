@@ -1,8 +1,9 @@
 jest.mock('../services/database', () => ({
   putVisit: jest.fn().mockResolvedValue(true),
+  scanVisits: jest.fn().mockResolvedValue([]),
 }));
 
-const { putVisit } = require('../services/database');
+const { putVisit, scanVisits } = require('../services/database');
 
 const request = require('supertest');
 const app = require('../app');
@@ -83,10 +84,13 @@ describe('POST /visits', () => {
 });
 
 describe('GET /visits', () => {
-  test('returns 200 and an array of visits', async () => {
+  test('returns 200 and an array of visits (from DB scan)', async () => {
     const res = await request(app).get('/visits');
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+
+    // DB interaction contract
+    expect(scanVisits).toHaveBeenCalledTimes(1);
   });
 });

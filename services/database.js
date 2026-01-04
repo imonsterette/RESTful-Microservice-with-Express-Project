@@ -24,4 +24,19 @@ async function putVisit(item) {
   return item;
 }
 
-module.exports = { putVisit };
+const { ScanCommand } = require('@aws-sdk/lib-dynamodb');
+
+async function scanVisits() {
+  if (!TABLE_NAME) {
+    throw new Error('DYNAMODB_TABLE is not set');
+  }
+
+  const command = new ScanCommand({
+    TableName: TABLE_NAME,
+  });
+
+  const result = await docClient.send(command);
+  return result.Items || [];
+}
+
+module.exports = { putVisit, scanVisits };
