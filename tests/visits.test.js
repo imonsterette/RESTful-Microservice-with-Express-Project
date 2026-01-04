@@ -9,3 +9,12 @@ describe('Health check', () => {
     expect(res.body).toEqual({ status: 'ok' });
   });
 });
+
+describe('404 handling', () => {
+  test('unknown route returns 404 with JSON error', async () => {
+    const res = await request(app).get('/nope');
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({ error: 'Not found' });
+  });
+});
