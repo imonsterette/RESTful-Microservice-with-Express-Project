@@ -6,6 +6,11 @@ const visitSchema = Joi.object({
   aspect: Joi.string()
     .valid('health', 'reputation', 'wealth', 'love', 'productivity', 'technology', 'travel', 'luck')
     .required(),
+  targetName: Joi.when('requestType', {
+    is: Joi.valid('blessing', 'curse'),
+    then: Joi.string().required(),
+    otherwise: Joi.forbidden(),
+  }),
 });
 
 function validateVisit(payload) {
