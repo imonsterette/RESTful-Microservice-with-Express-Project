@@ -9,9 +9,9 @@ const router = require('./views/router');
 app.use(router);
 
 // Minimal temorary route
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
+// app.get('/health', (req, res) => {
+//   res.status(200).json({ status: 'ok' });
+// });
 
 app.use((err, req, res, next) => {
   const isInvalidJson = err instanceof SyntaxError && err.status === 400 && 'body' in err;
