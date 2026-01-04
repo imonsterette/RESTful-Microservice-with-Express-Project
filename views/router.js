@@ -42,4 +42,9 @@ router.post('/visits', async (req, res, next) => {
   }
 });
 
+//temporary stub
+router.get('/visits', (req, res) => {
+  res.status(200).json([]);
+});
+
 module.exports = router;

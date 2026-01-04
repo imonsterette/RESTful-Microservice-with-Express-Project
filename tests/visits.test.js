@@ -81,3 +81,12 @@ describe('POST /visits', () => {
     expect(typeof savedItem.createdAt).toBe('string');
   });
 });
+
+describe('GET /visits', () => {
+  test('returns 200 and an array of visits', async () => {
+    const res = await request(app).get('/visits');
+
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+});
