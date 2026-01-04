@@ -4,6 +4,10 @@ const app = express();
 
 app.use(express.json());
 
+const router = require('./views/router');
+
+app.use(router);
+
 // Minimal temorary route
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
