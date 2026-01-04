@@ -51,6 +51,7 @@ describe('POST /visits', () => {
     });
 
     expect(typeof res.body.data.resultText).toBe('string');
+    expect(res.body.data.resultText).not.toContain('(stub)');
     expect(res.body.data.resultText.length).toBeGreaterThan(0);
   });
 });
