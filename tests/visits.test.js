@@ -29,3 +29,28 @@ describe('Invalid JSON handling', () => {
     expect(res.body).toEqual({ error: 'Invalid JSON' });
   });
 });
+
+describe('POST /visits', () => {
+  test('creates a visit and returns 201 with { message, data }', async () => {
+    const payload = {
+      seekerName: 'Hawra',
+      requestType: 'prophecy',
+      aspect: 'luck',
+    };
+
+    const res = await request(app).post('/visits').send(payload);
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('data');
+
+    expect(res.body.data).toMatchObject({
+      seekerName: 'Hawra',
+      requestType: 'prophecy',
+      aspect: 'luck',
+    });
+
+    expect(typeof res.body.data.resultText).toBe('string');
+    expect(res.body.data.resultText.length).toBeGreaterThan(0);
+  });
+});
