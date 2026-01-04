@@ -24,6 +24,8 @@
   },
   "homepage": "https://github.com/imonsterette/RESTful-Microservice-with-Express-Project#readme",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.962.0",
+    "@aws-sdk/lib-dynamodb": "^3.962.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "joi": "^18.0.2"

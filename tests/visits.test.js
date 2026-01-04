@@ -1,3 +1,9 @@
+jest.mock('../services/database', () => ({
+  putVisit: jest.fn().mockResolvedValue(true),
+}));
+
+const { putVisit } = require('../services/database');
+
 const request = require('supertest');
 const app = require('../app');
 
@@ -18,12 +24,13 @@ describe('404 handling', () => {
     expect(res.body).toEqual({ error: 'Not found' });
   });
 });
+
 describe('Invalid JSON handling', () => {
   test("POST with invalid JSON returns 400 and {error:'Invalid JSON'}", async () => {
     const res = await request(app)
       .post('/visits')
       .set('Content-Type', 'application/json')
-      .send('{ "seekerName": "Hawra", }'); // invalid JSON (trailing comma)
+      .send('{ "seekerName": "Hawra", }'); // invalid JSON
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({ error: 'Invalid JSON' });
@@ -40,18 +47,37 @@ describe('POST /visits', () => {
 
     const res = await request(app).post('/visits').send(payload);
 
+    // Response contract
     expect(res.statusCode).toBe(201);
     expect(res.body).toHaveProperty('message');
     expect(res.body).toHaveProperty('data');
 
+    // Echoed / validated fields
     expect(res.body.data).toMatchObject({
       seekerName: 'Hawra',
       requestType: 'prophecy',
       aspect: 'luck',
     });
 
+    // Oracle output (real, not stub)
     expect(typeof res.body.data.resultText).toBe('string');
-    expect(res.body.data.resultText).not.toContain('(stub)');
     expect(res.body.data.resultText.length).toBeGreaterThan(0);
+    expect(res.body.data.resultText).not.toContain('(stub)');
+
+    // Server-generated fields
+    expect(res.body.data).toHaveProperty('id');
+    expect(res.body.data).toHaveProperty('createdAt');
+
+    // DB call assertions (mocked)
+    expect(putVisit).toHaveBeenCalledTimes(1);
+
+    const savedItem = putVisit.mock.calls[0][0];
+    expect(savedItem).toMatchObject({
+      seekerName: 'Hawra',
+      requestType: 'prophecy',
+      aspect: 'luck',
+    });
+    expect(typeof savedItem.id).toBe('string');
+    expect(typeof savedItem.createdAt).toBe('string');
   });
 });
