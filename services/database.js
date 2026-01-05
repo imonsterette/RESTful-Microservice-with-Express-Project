@@ -4,6 +4,7 @@ const {
   PutCommand,
   ScanCommand,
   GetCommand,
+  UpdateCommand,
 } = require('@aws-sdk/lib-dynamodb');
 
 const REGION = process.env.AWS_REGION;
@@ -56,4 +57,28 @@ async function getVisitById(id) {
   return result.Item || null;
 }
 
-module.exports = { putVisit, scanVisits, getVisitById };
+async function updateVisit(id, patch) {
+  if (!TABLE_NAME) {
+    throw new Error('DYNAMODB_TABLE is not set');
+  }
+
+  const command = new UpdateCommand({
+    TableName: TABLE_NAME,
+    Key: { id },
+    UpdateExpression: 'SET #note = :note, #updatedAt = :updatedAt',
+    ExpressionAttributeNames: {
+      '#note': 'note',
+      '#updatedAt': 'updatedAt',
+    },
+    ExpressionAttributeValues: {
+      ':note': patch.note,
+      ':updatedAt': patch.updatedAt,
+    },
+    ReturnValues: 'ALL_NEW',
+  });
+
+  const result = await docClient.send(command);
+  return result.Attributes;
+}
+
+module.exports = { putVisit, scanVisits, getVisitById, updateVisit };
