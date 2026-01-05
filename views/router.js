@@ -5,8 +5,13 @@ const router = express.Router();
 
 const { validateVisit, validateVisitUpdate } = require('../models/visit');
 const { pickMessage } = require('../services/oracleEngine');
-const { putVisit, scanVisits, getVisitById, updateVisit } = require('../services/database');
-
+const {
+  putVisit,
+  scanVisits,
+  getVisitById,
+  updateVisit,
+  deleteVisitById,
+} = require('../services/database');
 // Health check
 router.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
@@ -90,6 +95,21 @@ router.put('/visits/:id', async (req, res, next) => {
 
     const updated = await updateVisit(req.params.id, patch);
     return res.status(200).json(updated);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.delete('/visits/:id', async (req, res, next) => {
+  try {
+    const existing = await getVisitById(req.params.id);
+
+    if (!existing) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    await deleteVisitById(req.params.id);
+    return res.status(204).send();
   } catch (err) {
     return next(err);
   }

@@ -3,9 +3,16 @@ jest.mock('../services/database', () => ({
   scanVisits: jest.fn().mockResolvedValue([]),
   getVisitById: jest.fn(),
   updateVisit: jest.fn(),
+  deleteVisitById: jest.fn(),
 }));
 
-const { putVisit, scanVisits, getVisitById, updateVisit } = require('../services/database');
+const {
+  putVisit,
+  scanVisits,
+  getVisitById,
+  updateVisit,
+  deleteVisitById,
+} = require('../services/database');
 
 const request = require('supertest');
 const app = require('../app');
@@ -203,5 +210,31 @@ describe('PUT /visits/:id', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toHaveProperty('error', 'Validation failed');
+  });
+});
+
+describe('DELETE /visits/:id', () => {
+  test('returns 204 when visit exists and is deleted', async () => {
+    getVisitById.mockResolvedValueOnce({ id: 'id-123' });
+    deleteVisitById.mockResolvedValueOnce(true);
+
+    const res = await request(app).delete('/visits/id-123');
+
+    expect(res.statusCode).toBe(204);
+    expect(res.text).toBe(''); // no body for 204
+
+    expect(getVisitById).toHaveBeenCalledWith('id-123');
+    expect(deleteVisitById).toHaveBeenCalledWith('id-123');
+  });
+
+  test('returns 404 when visit does not exist', async () => {
+    getVisitById.mockResolvedValueOnce(null);
+
+    const res = await request(app).delete('/visits/missing-id');
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({ error: 'Not found' });
+
+    expect(deleteVisitById).not.toHaveBeenCalled();
   });
 });
