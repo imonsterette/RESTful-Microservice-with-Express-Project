@@ -5,6 +5,7 @@ const {
   ScanCommand,
   GetCommand,
   UpdateCommand,
+  DeleteCommand,
 } = require('@aws-sdk/lib-dynamodb');
 
 const REGION = process.env.AWS_REGION;
@@ -81,4 +82,18 @@ async function updateVisit(id, patch) {
   return result.Attributes;
 }
 
-module.exports = { putVisit, scanVisits, getVisitById, updateVisit };
+async function deleteVisitById(id) {
+  if (!TABLE_NAME) {
+    throw new Error('DYNAMODB_TABLE is not set');
+  }
+
+  const command = new DeleteCommand({
+    TableName: TABLE_NAME,
+    Key: { id },
+  });
+
+  await docClient.send(command);
+  return true;
+}
+
+module.exports = { putVisit, scanVisits, getVisitById, updateVisit, deleteVisitById };
