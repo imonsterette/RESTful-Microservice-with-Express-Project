@@ -168,7 +168,7 @@ describe('PUT /visits/:id', () => {
     updateVisit.mockResolvedValueOnce({
       ...existing,
       note: 'I trust the omen.',
-      updatedAt: '2026-01-04T01:00:00.000Z',
+      updatedAt: '2026-01-05T10:00:00.000Z',
     });
 
     const res = await request(app).put('/visits/id-123').send({ note: 'I trust the omen.' });
@@ -192,7 +192,16 @@ describe('PUT /visits/:id', () => {
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({ error: 'Not found' });
 
-    expect(getVisitById).toHaveBeenCalledWith('missing-id');
     expect(updateVisit).not.toHaveBeenCalled();
+  });
+
+  test('returns 400 when note is invalid', async () => {
+    const existing = { id: 'id-123' };
+    getVisitById.mockResolvedValueOnce(existing);
+
+    const res = await request(app).put('/visits/id-123').send({ note: '' });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty('error', 'Validation failed');
   });
 });

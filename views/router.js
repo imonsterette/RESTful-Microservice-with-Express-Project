@@ -3,7 +3,7 @@ const { randomUUID } = require('crypto');
 
 const router = express.Router();
 
-const { validateVisit } = require('../models/visit');
+const { validateVisit, validateVisitUpdate } = require('../models/visit');
 const { pickMessage } = require('../services/oracleEngine');
 const { putVisit, scanVisits, getVisitById, updateVisit } = require('../services/database');
 
@@ -75,11 +75,20 @@ router.put('/visits/:id', async (req, res, next) => {
     const existing = await getVisitById(req.params.id);
     if (!existing) return res.status(404).json({ error: 'Not found' });
 
-    const note = req.body?.note;
+    const { error, value } = validateVisitUpdate(req.body);
+    if (error) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: error.details.map((d) => d.message),
+      });
+    }
 
-    // add Joi validation for note next step
-    const updated = await updateVisit(req.params.id, { note });
+    const patch = {
+      note: value.note,
+      updatedAt: new Date().toISOString(),
+    };
 
+    const updated = await updateVisit(req.params.id, patch);
     return res.status(200).json(updated);
   } catch (err) {
     return next(err);

@@ -17,4 +17,12 @@ function validateVisit(payload) {
   return visitSchema.validate(payload, { abortEarly: true });
 }
 
-module.exports = { visitSchema, validateVisit };
+const visitUpdateSchema = Joi.object({
+  note: Joi.string().min(1).max(280).required(),
+});
+
+function validateVisitUpdate(payload) {
+  return visitUpdateSchema.validate(payload, { abortEarly: true });
+}
+
+module.exports = { visitSchema, validateVisit, visitUpdateSchema, validateVisitUpdate };
