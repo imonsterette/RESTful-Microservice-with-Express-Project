@@ -239,7 +239,7 @@ terraform apply
 - `terraform init` succeeds
 - `terraform plan` fails with `InvalidClientTokenId` in the course WhizLabs sandbox
 
-Terraform apply will be completed once sandbox permissions/configuration are confirmed by instructors.
+Terraform apply will be completed once sandbox permissions/configuration are availble.
 
 ---
 
