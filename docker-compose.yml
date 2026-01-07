@@ -1,0 +1,21 @@
+services:
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -inMemory -sharedDb"
+
+  api:
+    build: .
+    container_name: oracle-api
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      AWS_REGION: "us-east-1"
+      DYNAMODB_TABLE: "OracleVisits"
+      # IMPORTANT: inside Docker, use the service name "dynamodb"
+      DYNAMODB_ENDPOINT: "http://dynamodb:8000"
+    depends_on:
+      - dynamodb
