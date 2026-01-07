@@ -8,12 +8,29 @@ const {
   DeleteCommand,
 } = require('@aws-sdk/lib-dynamodb');
 
-const REGION = process.env.AWS_REGION;
+// Region/table are provided via environment variables.
+// - In AWS mode: omit DYNAMODB_ENDPOINT and the SDK will talk to AWS.
+// - In local mode (DynamoDB Local): set DYNAMODB_ENDPOINT (e.g. http://localhost:8000)
+//   and we provide dummy credentials because the local emulator doesn't validate them,
+//   but the AWS SDK expects a credentials shape.
+const REGION = process.env.AWS_REGION || 'us-east-1';
 const TABLE_NAME = process.env.DYNAMODB_TABLE;
+const DYNAMODB_ENDPOINT = process.env.DYNAMODB_ENDPOINT;
 
-const client = new DynamoDBClient({
+/** @type {import('@aws-sdk/client-dynamodb').DynamoDBClientConfig} */
+const clientConfig = {
   region: REGION,
-});
+};
+
+if (DYNAMODB_ENDPOINT) {
+  clientConfig.endpoint = DYNAMODB_ENDPOINT;
+  clientConfig.credentials = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'local',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'local',
+  };
+}
+
+const client = new DynamoDBClient(clientConfig);
 
 const docClient = DynamoDBDocumentClient.from(client);
 
