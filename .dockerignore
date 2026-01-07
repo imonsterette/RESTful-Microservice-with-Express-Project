@@ -1,0 +1,22 @@
+# Node
+node_modules
+npm-debug.log
+
+# Git
+.git
+.gitignore
+
+# Env
+.env
+
+# Tests coverage (if any)
+coverage
+
+# Terraform
+terraform/.terraform
+terraform/*.tfstate
+terraform/*.tfstate.*
+
+# OS / editor
+.DS_Store
+.vscode
