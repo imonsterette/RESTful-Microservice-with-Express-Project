@@ -142,7 +142,10 @@ Health check:
 
 - `GET http://localhost:3000/health`
 
-### Creating the DynamoDB table (local)
+> ⚠️ This step is required **only for local development** using DynamoDB Local.
+> When using AWS DynamoDB, the table is provisioned automatically via Terraform.
+
+### Creating the DynamoDB table (local only)
 
 DynamoDB Local runs in-memory by default. After starting Docker Compose, create the table once per session:
 
@@ -195,6 +198,33 @@ curl http://localhost:3000/visits
 
 Returns an array of recorded visits.
 
+### GET /visits/:id
+
+```bash
+curl http://localhost:3000/visits/<visit-id>
+```
+
+**Response (200):**
+
+```json
+{
+  "id": "uuid-here",
+  "seekerName": "Hawra",
+  "requestType": "prophecy",
+  "aspect": "luck",
+  "resultText": "🜁 The winds say luck is nearby.",
+  "createdAt": "2026-01-07T16:25:03.502Z"
+}
+```
+
+**Response (404):**
+
+```json
+{
+  "error": "Not found"
+}
+```
+
 ---
 
 ## Docker (Local Development)
@@ -222,7 +252,11 @@ Health check:
 
 ## Terraform (Infrastructure as Code)
 
-Terraform configuration is included to provision the DynamoDB table (`OracleVisits`) using on-demand billing.
+Terraform has been successfully applied using a personal AWS account.
+
+The configuration provisions the `OracleVisits` DynamoDB table using on-demand billing.
+Once AWS credentials are configured, no code changes are required to switch the API
+from DynamoDB Local to AWS DynamoDB.
 
 ### Terraform commands
 
@@ -233,15 +267,21 @@ terraform plan
 terraform apply
 ```
 
-**Current status:**
-
-- `aws sts get-caller-identity` succeeds
-- `terraform init` succeeds
-- `terraform plan` fails with `InvalidClientTokenId` in the course WhizLabs sandbox
-
-Terraform apply will be completed once sandbox permissions/configuration are availble.
-
 ---
+
+## Local vs AWS DynamoDB
+
+This project uses an environment-based toggle for persistence:
+
+- **Local development:**  
+  Docker Compose injects `DYNAMODB_ENDPOINT=http://dynamodb:8000`, directing the API
+  to DynamoDB Local.
+
+- **AWS deployment:**  
+  When `DYNAMODB_ENDPOINT` is unset, the AWS SDK automatically connects to real
+  DynamoDB using configured AWS credentials.
+
+No application code changes are required to switch environments.
 
 ## Testing
 
